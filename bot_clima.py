@@ -1,5 +1,6 @@
 import requests
 from telegram import Bot
+from telegram.error import TelegramError
 import os
 import sys
 
@@ -31,7 +32,7 @@ def verificar_config():
 
 def obtener_clima_actual():
     url = (
-        f"http://api.openweathermap.org/data/2.5/weather"
+        f"https://api.openweathermap.org/data/2.5/weather"
         f"?q={CIUDAD}&appid={API_KEY}&units=metric&lang=es"
     )
     respuesta = requests.get(url, timeout=10)
@@ -49,7 +50,7 @@ def obtener_clima_actual():
 
 def obtener_pronostico():
     url = (
-        f"http://api.openweathermap.org/data/2.5/forecast"
+        f"https://api.openweathermap.org/data/2.5/forecast"
         f"?q={CIUDAD}&appid={API_KEY}&units=metric&lang=es&cnt=4"
     )
     respuesta = requests.get(url, timeout=10)
@@ -64,9 +65,13 @@ def obtener_pronostico():
 
 
 def enviar_mensaje(mensaje):
-    bot = Bot(token=TOKEN)
-    bot.send_message(chat_id=CHAT_ID, text=mensaje, parse_mode="HTML")
-    print(f"✅ Mensaje enviado")
+    try:
+        bot = Bot(token=TOKEN)
+        bot.send_message(chat_id=CHAT_ID, text=mensaje, parse_mode="HTML")
+        print(f"✅ Mensaje enviado")
+    except TelegramError as e:
+        print(f"❌ Error al enviar mensaje: {e}")
+        raise
 
 
 def comprobar_y_alertar():
