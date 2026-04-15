@@ -68,15 +68,21 @@ def enviar_mensaje(mensaje):
     try:
         bot = Bot(token=TOKEN)
         bot.send_message(chat_id=CHAT_ID, text=mensaje, parse_mode="HTML")
-        print(f"✅ Mensaje enviado")
+        print(f"✅ Mensaje enviado a Telegram")
     except TelegramError as e:
-        print(f"❌ Error al enviar mensaje: {e}")
+        print(f"❌ Error al enviar mensaje a Telegram: {e}")
         raise
 
 
 def comprobar_y_alertar():
     clima = obtener_clima_actual()
     alertas = []
+
+    print(f"📊 Datos obtenidos:")
+    print(f"   Temperatura: {clima['temp']}°C")
+    print(f"   Viento: {clima['viento']} m/s")
+    print(f"   Humedad: {clima['humedad']}%")
+    print(f"   Descripción: {clima['descripcion']}")
 
     if obtener_pronostico():
         alertas.append("🌧️ <b>Lluvia prevista</b> en las próximas horas")
@@ -89,13 +95,25 @@ def comprobar_y_alertar():
     elif clima["temp"] < UMBRAL_TEMP_BAJA:
         alertas.append(f"🥶 <b>Frío intenso:</b> {clima['temp']}°C")
 
+    # SIEMPRE enviar mensaje (con o sin alertas)
     if alertas:
-        cabecera = f"⚠️ <b>Alerta clima en {CIUDAD}</b>\n"
+        cabecera = f"⚠️ <b>ALERTA CLIMA en {CIUDAD}</b>\n"
         resumen = f"\n📍 Ahora: {clima['descripcion']}, {clima['temp']}°C (sensación {clima['sensacion']}°C)\n"
         mensaje = cabecera + resumen + "\n".join(alertas)
-        enviar_mensaje(mensaje)
+        print("⚠️ Enviando ALERTA...")
     else:
-        print(f"☀️ Todo tranquilo en {CIUDAD}: {clima['descripcion']}, {clima['temp']}°C")
+        # Mensaje normal cuando todo está bien
+        mensaje = (
+            f"☀️ <b>Reporte Clima - {CIUDAD}</b>\n\n"
+            f"🌡️ Temperatura: {clima['temp']}°C\n"
+            f"🤔 Sensación: {clima['sensacion']}°C\n"
+            f"💨 Viento: {clima['viento']} m/s\n"
+            f"💧 Humedad: {clima['humedad']}%\n"
+            f"📝 Estado: {clima['descripcion']}"
+        )
+        print("✅ Todo tranquilo, enviando reporte normal...")
+
+    enviar_mensaje(mensaje)
 
 
 # ══════════════════════════════════════════════
